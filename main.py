@@ -35,8 +35,14 @@ class TransparentBox(tk.Tk):
         self.y = None
         self.processed_text = None  # Define processed_text as an instance variable
 
-        # Bind the hotkey
+        # Bind the hotkey for OCR capture
         keyboard.add_hotkey('space', self.capture_text)
+
+        # Bind the hotkey for toggling Tesseract window
+        keyboard.add_hotkey('f9', self.toggle_tesseract_window)
+
+        # Initially hide the Tesseract window
+        self.tesseract_window_hidden = True
 
     def start_move(self, event):
         self.x = event.x
@@ -86,6 +92,12 @@ class TransparentBox(tk.Tk):
         # Show the processed text and cleaned items in a new window
         self.show_text(processed_text, cleaned_items)
 
+    def toggle_tesseract_window(self):
+        if self.tesseract_window_hidden:
+            self.deiconify()  # Show the Tesseract window
+        else:
+            self.withdraw()  # Hide the Tesseract window
+        self.tesseract_window_hidden = not self.tesseract_window_hidden
 
 def find_matching_items(processed_text, filename='unique_items.txt'):
     matching_items = []
@@ -96,7 +108,6 @@ def find_matching_items(processed_text, filename='unique_items.txt'):
                 if item_name.lower() in processed_text.lower():
                     matching_items.append({item_name: attributes})
     return matching_items
-
 
 def clean_matching_items(matching_items):
     cleaned_items = []
