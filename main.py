@@ -54,48 +54,49 @@ class TransparentBox(tk.Tk):
         self.geometry(f"+{self.winfo_x() + deltax}+{self.winfo_y() + deltay}")
 
     def show_text(self, processed_text, cleaned_items):
-        if hasattr(self, 'text_window') and self.text_window.winfo_exists():
-            # If text window already exists, destroy it
-            self.text_window.destroy()
+        if not self.tesseract_window_hidden:  # Check if the tesseract window is not hidden
+            if hasattr(self, 'text_window') and self.text_window.winfo_exists():
+                # If text window already exists, destroy it
+                self.text_window.destroy()
 
-        # Create a transparent window within the main window
-        self.text_window = tk.Toplevel(self)
-        self.text_window.attributes('-alpha', 0.5)  # Set transparency of the new window
-        self.text_window.overrideredirect(True)  # Remove window decorations
-        self.text_window.configure(bg='#000000')  # Set background color to transparent black
+            # Create a transparent window within the main window
+            self.text_window = tk.Toplevel(self)
+            self.text_window.attributes('-alpha', 0.5)  # Set transparency of the new window
+            self.text_window.overrideredirect(True)  # Remove window decorations
+            self.text_window.configure(bg='#000000')  # Set background color to transparent black
 
-        # Check if previous coordinates exist and position the window accordingly
-        if hasattr(self, 'text_window_x') and hasattr(self, 'text_window_y'):
-            self.text_window.geometry("+{}+{}".format(self.text_window_x, self.text_window_y))
-        else:
-            self.text_window.geometry("+{}+{}".format(self.winfo_x() - 400,
-                                                      self.winfo_y()))  # Position the window to the left of the main window
+            # Check if previous coordinates exist and position the window accordingly
+            if hasattr(self, 'text_window_x') and hasattr(self, 'text_window_y'):
+                self.text_window.geometry("+{}+{}".format(self.text_window_x, self.text_window_y))
+            else:
+                self.text_window.geometry("+{}+{}".format(self.winfo_x() - 400,
+                                                          self.winfo_y()))  # Position the window to the left of the main window
 
-        # Bind mouse events for moving the window
-        self.text_window.bind('<B1-Motion>', lambda event: self.move_text_window(event))
-        self.text_window.bind('<ButtonPress-1>', lambda event: self.start_move_text_window(event))
+            # Bind mouse events for moving the window
+            self.text_window.bind('<B1-Motion>', lambda event: self.move_text_window(event))
+            self.text_window.bind('<ButtonPress-1>', lambda event: self.start_move_text_window(event))
 
-        # Bind window closure event to store window position
-        self.text_window.protocol("WM_DELETE_WINDOW", self.on_text_window_close)
+            # Bind window closure event to store window position
+            self.text_window.protocol("WM_DELETE_WINDOW", self.on_text_window_close)
 
-        # Create a frame to hold the text
-        text_frame = tk.Frame(self.text_window, bg='#000000')  # Set frame background color to transparent black
-        text_frame.pack(fill=tk.BOTH, expand=True)
+            # Create a frame to hold the text
+            text_frame = tk.Frame(self.text_window, bg='#000000')  # Set frame background color to transparent black
+            text_frame.pack(fill=tk.BOTH, expand=True)
 
-        # Create a text widget to display the processed text
-        text_area = tk.Text(text_frame, wrap=tk.WORD, bg='#000000', fg='white', font=('Arial', 12),
-                            width=250)  # Set text widget background color to transparent black
-        text_area.insert(tk.END, "Processed Text:\n")
-        text_area.insert(tk.END, processed_text)
-        text_area.insert(tk.END, "\n\nCleaned Items:\n")
-        formatted_items = json.dumps(cleaned_items, indent=4)  # Pretty-print the cleaned items
-        text_area.insert(tk.END, formatted_items)
-        text_area.pack(expand=True, fill=tk.BOTH)
+            # Create a text widget to display the processed text
+            text_area = tk.Text(text_frame, wrap=tk.WORD, bg='#000000', fg='white', font=('Arial', 12),
+                                width=250)  # Set text widget background color to transparent black
+            text_area.insert(tk.END, "Processed Text:\n")
+            text_area.insert(tk.END, processed_text)
+            text_area.insert(tk.END, "\n\nCleaned Items:\n")
+            formatted_items = json.dumps(cleaned_items, indent=4)  # Pretty-print the cleaned items
+            text_area.insert(tk.END, formatted_items)
+            text_area.pack(expand=True, fill=tk.BOTH)
 
-        # Resize the window to fit the content
-        self.text_window.update_idletasks()
-        height = text_area.winfo_reqheight() + self.text_window.winfo_height() - text_frame.winfo_height()
-        self.text_window.geometry("250x{}".format(height))
+            # Resize the window to fit the content
+            self.text_window.update_idletasks()
+            height = text_area.winfo_reqheight() + self.text_window.winfo_height() - text_frame.winfo_height()
+            self.text_window.geometry("250x{}".format(height))
 
     def move_text_window(self, event):
         # Calculate the new position of the window
